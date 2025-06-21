@@ -3,7 +3,7 @@ import requests
 import datetime
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QTextBrowser, QMessageBox, QHBoxLayout
 from PyQt5 import QtCore
-from PyQt5.QtCore import QDate, QUrl
+from PyQt5.QtCore import QDate, QUrl, QSettings
 from PyQt5.QtGui import QDesktopServices
 
 API_KEY = "3aeace82f952472ab2151a44cf0e736b"
@@ -68,6 +68,20 @@ class MealApp(QWidget):
         self.school_code = None
         self.office_code = None
         self.initUI()
+
+        # Load last used codes on startup
+        settings = QSettings("KyuheonHan", "KyuheonMealApp")
+        school_name = settings.value("schoolName", "")
+        office_code = settings.value("officeCode", "")
+        school_code = settings.value("schoolCode", "")
+
+        if school_name:
+            self.school_input.setText(school_name)
+        if office_code and school_code:
+            self.office_code = office_code
+            self.school_code = school_code
+            self.office_code_display.setText(office_code)
+            self.school_code_display.setText(school_code)
 
     def initUI(self):
         self.setWindowTitle("Kyuheon's 학교 급식 정보 조회 앱")
@@ -146,6 +160,12 @@ class MealApp(QWidget):
             self.school_code = school_code
             self.office_code_display.setText(self.office_code)
             self.school_code_display.setText(self.school_code)
+
+            # Save the successfully retrieved codes
+            settings = QSettings("KyuheonHan", "KyuheonMealApp")
+            settings.setValue("schoolName", school_name)
+            settings.setValue("officeCode", self.office_code)
+            settings.setValue("schoolCode", self.school_code)
 
             QMessageBox.information(self, '코드 조회 완료', f"'{school_name}'의 코드를 찾았습니다.")
             
